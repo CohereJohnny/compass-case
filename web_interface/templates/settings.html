@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Cohere Compass SDK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cohere-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Decorative blobs -->
+    <div class="blob-decoration blob-blue"></div>
+    <div class="blob-decoration blob-purple"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cohere Compass SDK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/indexes">Indexes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api-explorer">API Explorer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1><span class="gradient-text">Settings</span></h1>
+        
+        {% if success_message %}
+        <div class="alert alert-success mt-3">
+            {{ success_message }}
+        </div>
+        {% endif %}
+        
+        {% if error %}
+        <div class="alert alert-danger mt-3">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="card mt-4 fade-in-element">
+            <div class="card-header">
+                <h5 class="mb-0">Application Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="settings-form" method="POST" action="/settings">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Cohere Compass Settings</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="compass_api_bearer_token" class="form-label">Compass API Bearer Token</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="compass_api_bearer_token" name="compass_api_bearer_token" 
+                                                value="{{ settings.get('compass_api_bearer_token', '') }}" 
+                                                placeholder="Enter your Compass API Bearer Token">
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="compass_api_bearer_token">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text text-muted">This token is used to authenticate with the Compass API.</div>
+                                        <div class="form-text">
+                                            <a href="https://docs.cohere.com/docs/compass-getting-started" target="_blank" class="text-decoration-none">
+                                                <i class="bi bi-info-circle"></i> Where to find this token?
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Cohere API Settings</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="cohere_api_key" class="form-label">Cohere API Key</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="cohere_api_key" name="cohere_api_key" 
+                                                value="{{ settings.get('cohere_api_key', '') }}" 
+                                                placeholder="Enter your Cohere API Key">
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="cohere_api_key">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text text-muted">Required for chat functionality and accessing available models.</div>
+                                        <div class="form-text">
+                                            <a href="https://dashboard.cohere.com/api-keys" target="_blank" class="text-decoration-none">
+                                                <i class="bi bi-info-circle"></i> Get your API key from Cohere Dashboard
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Chat Model Selection</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="chat_model" class="form-label">Chat Model</label>
+                                <select class="form-select" id="chat_model" name="chat_model">
+                                    <option value="">Loading models...</option>
+                                </select>
+                                <div class="form-text text-muted">Select the model to use for chat functionality.</div>
+                                <!-- Model description will be dynamically inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">Cohere Compass SDK Web Interface</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cohere-theme.js') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup password toggle buttons
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    this.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                } else {
+                    input.type = 'password';
+                    this.innerHTML = '<i class="bi bi-eye"></i>';
+                }
+            });
+        });
+    
+        const chatModelSelect = document.getElementById('chat_model');
+        const cohereApiKey = document.getElementById('cohere_api_key');
+        const currentSelectedModel = '{{ settings.get("chat_model", "") }}';
+        
+        // Function to fetch available chat models
+        async function fetchChatModels() {
+            try {
+                // Get the Cohere API key from the input field
+                const apiKey = cohereApiKey.value;
+                
+                if (!apiKey) {
+                    chatModelSelect.innerHTML = '<option value="">Enter Cohere API Key to load models</option>';
+                    return;
+                }
+                
+                chatModelSelect.innerHTML = '<option value="">Loading models...</option>';
+                
+                // Fetch available models from the server
+                const response = await fetch('/api/models?api_key=' + encodeURIComponent(apiKey));
+                const data = await response.json();
+                
+                if (data.error) {
+                    chatModelSelect.innerHTML = `<option value="">Error loading models: ${data.error}</option>`;
+                    console.error('API Error:', data.error);
+                    return;
+                }
+                
+                // Clear the select and add the available models
+                chatModelSelect.innerHTML = '';
+                
+                // Add a default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.text = 'Select a model';
+                chatModelSelect.appendChild(defaultOption);
+                
+                // Sort models by name
+                data.models.sort((a, b) => a.name.localeCompare(b.name));
+                
+                // Add each model as an option
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.text = model.name;
+                    option.dataset.description = model.description || '';
+                    
+                    // If this was the previously selected model, select it
+                    if (model.name === currentSelectedModel) {
+                        option.selected = true;
+                    }
+                    
+                    chatModelSelect.appendChild(option);
+                });
+                
+                // Trigger change event to update description
+                updateModelDescription();
+                
+            } catch (error) {
+                console.error('Error fetching models:', error);
+                chatModelSelect.innerHTML = '<option value="">Error fetching models</option>';
+            }
+        }
+        
+        // Function to update the model description
+        function updateModelDescription() {
+            const selectedOption = chatModelSelect.options[chatModelSelect.selectedIndex];
+            const description = selectedOption.dataset.description;
+            
+            // Get the form-text element after the select
+            let descriptionElement = chatModelSelect.nextElementSibling.nextElementSibling;
+            
+            // If it doesn't exist, create one
+            if (!descriptionElement || !descriptionElement.classList.contains('model-description')) {
+                descriptionElement = document.createElement('div');
+                descriptionElement.className = 'form-text model-description mt-2';
+                chatModelSelect.parentNode.insertBefore(descriptionElement, chatModelSelect.nextElementSibling.nextElementSibling);
+            }
+            
+            // Update the description
+            if (description) {
+                descriptionElement.textContent = description;
+                descriptionElement.style.display = 'block';
+            } else {
+                descriptionElement.style.display = 'none';
+            }
+        }
+        
+        // Add event listeners
+        chatModelSelect.addEventListener('change', updateModelDescription);
+        cohereApiKey.addEventListener('blur', fetchChatModels);
+        
+        // Initial fetch if API key exists
+        if (cohereApiKey.value) {
+            fetchChatModels();
+        }
+    });
+    </script>
+</body>
+</html> 

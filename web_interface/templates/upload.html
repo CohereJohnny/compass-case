@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Document - {{ index_name }} - Cohere Compass SDK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cohere-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Decorative blobs -->
+    <div class="blob-decoration blob-blue"></div>
+    <div class="blob-decoration blob-purple"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cohere Compass SDK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/indexes">Indexes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api-explorer">API Explorer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><span class="gradient-text">Upload Document</span></h1>
+            <a href="/indexes/{{ index_name }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Index
+            </a>
+        </div>
+
+        <div class="mb-3">
+            <span class="badge rounded-pill bg-info">Index: {{ index_name }}</span>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card fade-in-element">
+                    <div class="card-body p-4">
+                        <form method="post" enctype="multipart/form-data">
+                            <div class="mb-4">
+                                <label for="document" class="form-label">Document File <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="document" name="document" required>
+                                <div class="form-text">Supported formats: PDF, DOC, DOCX, TXT, etc.</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="advanced_settings" name="advanced_settings">
+                                    <label class="form-check-label" for="advanced_settings">Use Advanced Parsing Settings</label>
+                                </div>
+                            </div>
+                            
+                            <div id="parsingOptions" class="mb-4 fade-in-element" style="display: none;">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Advanced Parsing Options</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="pdf_parsing_strategy" class="form-label">PDF Parsing Strategy</label>
+                                            <select class="form-select" id="pdf_parsing_strategy" name="pdf_parsing_strategy">
+                                                <option value="default">Default</option>
+                                                <option value="image_to_markdown">Image To Markdown</option>
+                                                <option value="text_extraction">Text Extraction</option>
+                                            </select>
+                                            <div class="form-text">ImageToMarkdown works better for PDFs with complex layouts or images.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="chunk_size" class="form-label">Chunk Size</label>
+                                            <input type="number" class="form-control" id="chunk_size" name="chunk_size" value="1000">
+                                            <div class="form-text">Maximum number of characters per chunk.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="chunk_overlap" class="form-label">Chunk Overlap</label>
+                                            <input type="number" class="form-control" id="chunk_overlap" name="chunk_overlap" value="200">
+                                            <div class="form-text">Number of characters to overlap between chunks.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <a href="/indexes/{{ index_name }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upload"></i> Upload
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">Cohere Compass SDK Web Interface</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/cohere-theme.js') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const advancedSettingsCheckbox = document.getElementById('advanced_settings');
+        const parsingOptions = document.getElementById('parsingOptions');
+        
+        advancedSettingsCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                parsingOptions.style.display = 'block';
+                setTimeout(() => {
+                    parsingOptions.classList.add('active');
+                }, 10);
+            } else {
+                parsingOptions.classList.remove('active');
+                setTimeout(() => {
+                    parsingOptions.style.display = 'none';
+                }, 300);
+            }
+        });
+    });
+    </script>
+</body>
+</html> 

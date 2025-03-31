@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cohere Compass SDK - Web Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cohere-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Decorative blobs -->
+    <div class="blob-decoration blob-blue"></div>
+    <div class="blob-decoration blob-purple"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cohere Compass SDK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/indexes">Indexes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api-explorer">API Explorer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="jumbotron fade-in-element">
+            <h1 class="display-4">Welcome to <span class="gradient-text">Cohere Compass SDK</span> Web Interface</h1>
+            <p class="lead">This web interface allows you to interact with the Cohere Compass API using the Compass SDK.</p>
+            <hr class="my-4">
+            <p>Use this interface to manage indexes, search documents, and explore the API functionality.</p>
+            <div class="mt-4">
+                <a href="/indexes" class="btn btn-primary btn-lg me-2">View Indexes</a>
+                <a href="/api-explorer" class="btn btn-secondary btn-lg">API Explorer</a>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <div class="card mb-4 fade-in-element">
+                    <div class="card-body">
+                        <h5 class="card-title">Index Management</h5>
+                        <p class="card-text">Create, view, and manage your Compass indexes.</p>
+                        <a href="/indexes" class="btn btn-primary">View Indexes</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4 fade-in-element">
+                    <div class="card-body">
+                        <h5 class="card-title">API Explorer</h5>
+                        <p class="card-text">Interactively test and explore the SDK's API functionality.</p>
+                        <a href="/api-explorer" class="btn btn-primary">Explore API</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4 fade-in-element">
+                    <div class="card-body">
+                        <h5 class="card-title">Documentation</h5>
+                        <p class="card-text">Access comprehensive SDK documentation and guides.</p>
+                        <a href="/docs" class="btn btn-primary">View Docs</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">Cohere Compass SDK Web Interface</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cohere-theme.js') }}"></script>
+</body>
+</html> 

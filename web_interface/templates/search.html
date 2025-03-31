@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search - {{ index_name }} - Cohere Compass SDK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cohere-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Decorative blobs -->
+    <div class="blob-decoration blob-blue"></div>
+    <div class="blob-decoration blob-purple"></div>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cohere Compass SDK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/indexes">Indexes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api-explorer">API Explorer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><span class="gradient-text">Search</span></h1>
+            <a href="/indexes/{{ index_name }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Index
+            </a>
+        </div>
+
+        <div class="mb-3">
+            <span class="badge rounded-pill bg-info">Index: {{ index_name }}</span>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="card mb-4 fade-in-element">
+            <div class="card-body p-4">
+                <form method="post">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="query" placeholder="Enter your search query" value="{{ query }}" required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="top_k" class="form-label">Max Results</label>
+                                <input type="number" class="form-control" id="top_k" name="top_k" min="1" max="100" value="{{ request.form.get('top_k', 10) }}">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if query and documents %}
+        <h2 class="mb-3 fade-in-element">Search Results for "<span class="text-primary">{{ query }}</span>"</h2>
+        <div class="search-results fade-in-element">
+            {% for doc in documents %}
+            <div class="card mb-3 search-result-card">
+                <div class="card-body">
+                    <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0">{{ doc.document_id }}</h5>
+                        <span class="badge bg-primary">
+                            {% if doc.score is defined %}
+                                Relevance: {{ "%.2f"|format(doc.score) }}
+                            {% elif hasattr(doc, 'score') %}
+                                Relevance: {{ "%.2f"|format(doc.score) }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <p class="text-muted mb-3">{{ doc.path }}</p>
+                    {% if doc.content %}
+                        {% if doc.content is mapping %}
+                            <div class="content-preview">
+                                {% if 'text' in doc.content %}
+                                    <pre class="mb-0">{{ doc.content.text }}</pre>
+                                {% else %}
+                                    <pre class="mb-0">{{ doc.content }}</pre>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="content-preview">
+                                <pre class="mb-0">{{ doc.content }}</pre>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% elif query %}
+        <div class="alert alert-info fade-in-element">
+            <p class="mb-0">No results found for "<span class="fw-bold">{{ query }}</span>". Try a different search query.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">Cohere Compass SDK Web Interface</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/cohere-theme.js') }}"></script>
+</body>
+</html> 

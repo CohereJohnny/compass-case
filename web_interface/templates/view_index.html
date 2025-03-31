@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ index_name }} - Cohere Compass SDK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cohere-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .btn-coral {
+            background-color: #FF7F50;
+            border-color: #FF7F50;
+            color: white;
+        }
+        
+        .btn-coral:hover {
+            background-color: #FF6347;
+            border-color: #FF6347;
+            color: white;
+        }
+        
+        .btn-outline-coral {
+            color: #FF7F50;
+            border-color: #FF7F50;
+        }
+        
+        .btn-outline-coral:hover {
+            background-color: rgba(255, 127, 80, 0.1);
+            color: #FF7F50;
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative blobs -->
+    <div class="blob-decoration blob-blue"></div>
+    <div class="blob-decoration blob-purple"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cohere Compass SDK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/indexes">Indexes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api-explorer">API Explorer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        {% if error %}
+        <div class="alert alert-danger">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><span class="gradient-text">{{ index_name }}</span></h1>
+            <div>
+                <a href="/indexes/{{ index_name }}/search" class="btn btn-coral me-2">
+                    <i class="bi bi-search"></i> Search
+                </a>
+                <a href="/indexes/{{ index_name }}/upload" class="btn btn-coral me-2">
+                    <i class="bi bi-upload"></i> Upload
+                </a>
+                <a href="/indexes/{{ index_name }}/chat" class="btn btn-coral">
+                    <i class="bi bi-chat-dots"></i> Chat
+                </a>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card fade-in-element">
+                    <div class="card-header">
+                        <h5 class="mb-0">Index Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Documents:</span>
+                                <strong>{{ index.parent_doc_count }}</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Chunks:</span>
+                                <strong>{{ index.count }}</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mb-3 fade-in-element">Documents</h2>
+        {% if documents %}
+        <div class="table-responsive fade-in-element">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Document ID</th>
+                        <th>Path</th>
+                        <th>Chunks</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td>{{ doc.document_id }}</td>
+                        <td>{{ doc.path }}</td>
+                        <td>
+                            {% if doc.chunks is defined %}
+                                {{ doc.chunks|length }}
+                            {% elif hasattr(doc, 'chunks') %}
+                                {{ doc.chunks|length }}
+                            {% else %}
+                                1
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-coral view-doc-btn" data-doc-id="{{ doc.document_id }}">
+                                <i class="bi bi-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info fade-in-element">
+            <p class="mb-0">No documents found in this index. <a href="/indexes/{{ index_name }}/upload">Upload a document</a> to get started.</p>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Document Preview Modal -->
+    <div class="modal fade" id="documentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Document Content</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="documentContent" class="p-3"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">Cohere Compass SDK Web Interface</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/cohere-theme.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // View document button functionality
+            const viewDocButtons = document.querySelectorAll('.view-doc-btn');
+            const documentModal = new bootstrap.Modal(document.getElementById('documentModal'));
+            const documentContent = document.getElementById('documentContent');
+            
+            viewDocButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const docId = this.getAttribute('data-doc-id');
+                    
+                    // Set loading state
+                    documentContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3">Loading document content...</p></div>';
+                    
+                    // Show modal
+                    documentModal.show();
+                    
+                    // Fetch document content (mock functionality - would need backend route)
+                    // Replace with actual fetch when backend route is available
+                    setTimeout(() => {
+                        documentContent.innerHTML = `<p>This is a placeholder for document content (ID: ${docId}).</p><p>In a production environment, this would fetch the actual document content from the server.</p>`;
+                    }, 1000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

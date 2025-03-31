@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Cohere Compass SDK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cohere-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Decorative blobs -->
+    <div class="blob-decoration blob-blue"></div>
+    <div class="blob-decoration blob-purple"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cohere Compass SDK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/indexes">Indexes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api-explorer">API Explorer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/docs">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1><span class="gradient-text">Documentation</span></h1>
+        
+        <div class="card mt-4 fade-in-element">
+            <div class="card-body">
+                <h2>Getting Started</h2>
+                <p>This web interface provides a user-friendly way to interact with the Cohere Compass SDK. The SDK is designed to help you build and manage retrieval-augmented applications.</p>
+                
+                <h3>Key Features</h3>
+                <ul>
+                    <li>Create and manage indexes</li>
+                    <li>Upload documents to indexes</li>
+                    <li>Search indexed documents</li>
+                    <li>Chat with indexes using Cohere's powerful language models</li>
+                    <li>API explorer for testing SDK functionality</li>
+                </ul>
+                
+                <h3>Prerequisites</h3>
+                <p>To use this interface, you'll need:</p>
+                <ol>
+                    <li>A Cohere API key (for chat functionality and LLM access)</li>
+                    <li>A Compass API Bearer token (for accessing the Compass service)</li>
+                </ol>
+                
+                <h2>Setting Up</h2>
+                <p>Before using the interface, you should configure your API keys in the <a href="/settings">Settings</a> page.</p>
+                
+                <h2>Guide to Key Features</h2>
+                
+                <h3>1. Index Management</h3>
+                <p>Navigate to the <a href="/indexes">Indexes</a> page to view all your Compass indexes. From there, you can:</p>
+                <ul>
+                    <li>Create new indexes</li>
+                    <li>View index details</li>
+                    <li>Upload documents to existing indexes</li>
+                    <li>Search indexed documents</li>
+                    <li>Chat with specific indexes</li>
+                </ul>
+                
+                <h3>2. Document Upload</h3>
+                <p>When uploading documents to an index, you can:</p>
+                <ul>
+                    <li>Upload text files directly</li>
+                    <li>Upload documents in batches</li>
+                    <li>Add document metadata</li>
+                </ul>
+                
+                <h3>3. Search</h3>
+                <p>The search functionality allows you to find documents in your indexes using:</p>
+                <ul>
+                    <li>Keyword search</li>
+                    <li>Semantic search</li>
+                    <li>Filtered search using metadata</li>
+                </ul>
+                
+                <h3>4. Chat</h3>
+                <p>The chat interface provides a way to have conversations with your indexed data, powered by Cohere's language models. Key features include:</p>
+                <ul>
+                    <li>Contextual conversations based on your data</li>
+                    <li>Visibility into the retrieved context for transparency</li>
+                    <li>Model selection for different capabilities</li>
+                </ul>
+                
+                <h2>API Explorer</h2>
+                <p>The <a href="/api-explorer">API Explorer</a> provides a GUI for interacting with the Compass SDK methods. This is useful for:</p>
+                <ul>
+                    <li>Testing functionality before implementing it in your code</li>
+                    <li>Understanding the API structure and response format</li>
+                    <li>Debugging issues with your indexes or documents</li>
+                </ul>
+                
+                <h2>Additional Resources</h2>
+                <ul>
+                    <li><a href="https://docs.cohere.com/docs/compass-getting-started" target="_blank">Cohere Compass Documentation</a></li>
+                    <li><a href="https://cohere.com/blog" target="_blank">Cohere Blog</a></li>
+                    <li><a href="https://docs.cohere.com/reference/about" target="_blank">Cohere API Reference</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">Cohere Compass SDK Web Interface</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cohere-theme.js') }}"></script>
+</body>
+</html> 

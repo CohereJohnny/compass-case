@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Explorer - Cohere Compass SDK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cohere-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .json-response {
+            max-height: 500px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .btn-coral {
+            background-color: #FF7F50;
+            border-color: #FF7F50;
+            color: white;
+        }
+        
+        .btn-coral:hover {
+            background-color: #FF6347;
+            border-color: #FF6347;
+            color: white;
+        }
+        
+        .btn-outline-coral {
+            color: #FF7F50;
+            border-color: #FF7F50;
+        }
+        
+        .btn-outline-coral:hover {
+            background-color: rgba(255, 127, 80, 0.1);
+            color: #FF7F50;
+        }
+        
+        .api-panel {
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .api-panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .example-code {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .method-doc {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative blobs -->
+    <div class="blob-decoration blob-blue"></div>
+    <div class="blob-decoration blob-purple"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cohere Compass SDK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/indexes">Indexes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/api-explorer">API Explorer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1><span class="gradient-text">API Explorer</span></h1>
+        <p class="lead">Explore and test the Cohere Compass SDK APIs interactively.</p>
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="row mt-4">
+            <div class="col-md-6 fade-in-element">
+                <div class="api-panel">
+                    <div class="api-panel-title">API Request</div>
+                    <form id="api-request-form">
+                        <div class="form-group">
+                            <label for="client-type" class="form-label">Client Type</label>
+                            <select id="client-type" class="form-select">
+                                <option value="compass" selected>CompassClient</option>
+                                <option value="parser">CompassParserClient</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="method-select" class="form-label">Method</label>
+                            <select id="method-select" class="form-select">
+                                <option value="" selected disabled>Select a method...</option>
+                                {% for method in api_methods %}
+                                <option value="{{ method.id }}">{{ method.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div id="parameters-container">
+                            <!-- Parameters will be dynamically added here based on selected method -->
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="max-retries" class="form-label">Max retries</label>
+                            <input type="number" id="max-retries" class="form-control" value="3">
+                            <div class="form-text">Maximum number of retries for the request.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sleep-retry-seconds" class="form-label">Sleep retry seconds</label>
+                            <input type="number" id="sleep-retry-seconds" class="form-control" value="1">
+                            <div class="form-text">Seconds to wait between retries.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" id="execute-btn" class="btn btn-coral">Execute</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="method-doc" id="method-documentation">
+                    <h5>Method Documentation</h5>
+                    <div id="method-doc-content">
+                        <p>Select a method to view its documentation.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 fade-in-element">
+                <div class="api-panel">
+                    <div class="api-panel-title">Response</div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="badge bg-secondary me-2" id="status-code">Status: -</span>
+                            <span class="text-muted" id="response-time"></span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-coral" id="copy-response">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                    <pre class="json-response" id="response-container">No response yet</pre>
+                </div>
+                
+                <div class="api-panel">
+                    <div class="api-panel-title">Example Code</div>
+                    <pre class="example-code" id="example-code">
+from cohere_compass.clients import CompassClient
+
+# Initialize the client
+client = CompassClient(
+    index_url="YOUR_API_URL",
+    bearer_token="YOUR_API_KEY"
+)
+
+# Select a method to see example code
+</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">Cohere Compass SDK Web Interface</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cohere-theme.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // API methods data from server
+            const apiMethods = {
+                {% for method in api_methods %}
+                "{{ method.id }}": {
+                    name: "{{ method.name }}",
+                    description: "{{ method.description }}",
+                    params: [
+                        {% for param in method.params %}
+                        {
+                            name: "{{ param.name }}",
+                            type: "{{ param.type }}",
+                            required: {{ 'true' if param.required else 'false' }},
+                            description: "{{ param.description }}"
+                            {% if param.default is defined %}
+                            ,default: "{{ param.default }}"
+                            {% endif %}
+                        }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            };
+            
+            const clientTypeSelect = document.getElementById('client-type');
+            const methodSelect = document.getElementById('method-select');
+            const paramsContainer = document.getElementById('parameters-container');
+            const methodDocContent = document.getElementById('method-doc-content');
+            const exampleCodeEl = document.getElementById('example-code');
+            const apiForm = document.getElementById('api-request-form');
+            const executeBtn = document.getElementById('execute-btn');
+            const responseContainer = document.getElementById('response-container');
+            const statusCode = document.getElementById('status-code');
+            const responseTime = document.getElementById('response-time');
+            const copyResponseBtn = document.getElementById('copy-response');
+            const maxRetries = document.getElementById('max-retries');
+            const sleepRetrySeconds = document.getElementById('sleep-retry-seconds');
+            
+            // Method selection change
+            methodSelect.addEventListener('change', function() {
+                const methodId = this.value;
+                if (!methodId) return;
+                
+                const method = apiMethods[methodId];
+                
+                // Update parameters container
+                paramsContainer.innerHTML = '';
+                method.params.forEach(param => {
+                    const paramRow = document.createElement('div');
+                    paramRow.className = 'form-group';
+                    
+                    const paramLabel = document.createElement('label');
+                    paramLabel.className = 'form-label';
+                    paramLabel.htmlFor = `param-${param.name}`;
+                    paramLabel.textContent = param.name;
+                    if (param.required) {
+                        const requiredStar = document.createElement('span');
+                        requiredStar.className = 'text-danger';
+                        requiredStar.textContent = ' *';
+                        paramLabel.appendChild(requiredStar);
+                    }
+                    
+                    let paramInput;
+                    
+                    if (param.type === 'object' || param.type === 'array') {
+                        paramInput = document.createElement('textarea');
+                        paramInput.className = 'form-control';
+                        paramInput.rows = 5;
+                        paramInput.placeholder = `Enter as JSON ${param.type}`;
+                    } else if (param.type === 'boolean') {
+                        paramInput = document.createElement('select');
+                        paramInput.className = 'form-select';
+                        
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Select...';
+                        
+                        const trueOption = document.createElement('option');
+                        trueOption.value = 'true';
+                        trueOption.textContent = 'True';
+                        
+                        const falseOption = document.createElement('option');
+                        falseOption.value = 'false';
+                        falseOption.textContent = 'False';
+                        
+                        paramInput.appendChild(defaultOption);
+                        paramInput.appendChild(trueOption);
+                        paramInput.appendChild(falseOption);
+                    } else if (param.type === 'number' || param.type === 'integer') {
+                        paramInput = document.createElement('input');
+                        paramInput.type = 'number';
+                        paramInput.className = 'form-control';
+                    } else {
+                        paramInput = document.createElement('input');
+                        paramInput.type = 'text';
+                        paramInput.className = 'form-control';
+                    }
+                    
+                    paramInput.id = `param-${param.name}`;
+                    paramInput.name = param.name;
+                    if (param.required) {
+                        paramInput.required = true;
+                    }
+                    if (param.default) {
+                        paramInput.value = param.default;
+                    }
+                    
+                    const helpText = document.createElement('div');
+                    helpText.className = 'form-text';
+                    helpText.textContent = param.description;
+                    
+                    paramRow.appendChild(paramLabel);
+                    paramRow.appendChild(paramInput);
+                    paramRow.appendChild(helpText);
+                    
+                    paramsContainer.appendChild(paramRow);
+                });
+                
+                // Update method documentation
+                methodDocContent.innerHTML = `
+                    <h6>${method.name}</h6>
+                    <p>${method.description}</p>
+                `;
+                
+                // Update example code
+                let exampleParams = '';
+                method.params.forEach(param => {
+                    if (param.required) {
+                        if (param.type === 'string') {
+                            exampleParams += `    ${param.name}="example_value",\n`;
+                        } else if (param.type === 'integer' || param.type === 'number') {
+                            exampleParams += `    ${param.name}=10,\n`;
+                        } else if (param.type === 'boolean') {
+                            exampleParams += `    ${param.name}=True,\n`;
+                        } else if (param.type === 'object') {
+                            exampleParams += `    ${param.name}={"key": "value"},\n`;
+                        } else if (param.type === 'array') {
+                            exampleParams += `    ${param.name}=["item1", "item2"],\n`;
+                        }
+                    }
+                });
+                
+                const clientType = clientTypeSelect.value;
+                exampleCodeEl.textContent = `from cohere_compass.clients import ${clientType === 'compass' ? 'CompassClient' : 'CompassParserClient'}
+
+# Initialize the client
+client = ${clientType === 'compass' ? 'CompassClient' : 'CompassParserClient'}(
+    ${clientType === 'compass' ? 'index_url' : 'parser_url'}="YOUR_API_URL",
+    bearer_token="YOUR_API_KEY"
+)
+
+# Call the method
+response = client.${methodId}(
+${exampleParams})
+
+# Process the response
+print(response)
+`;
+            });
+            
+            // Form submission
+            apiForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const methodId = methodSelect.value;
+                if (!methodId) {
+                    alert('Please select a method');
+                    return;
+                }
+                
+                // Show loading state
+                executeBtn.disabled = true;
+                executeBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+                
+                try {
+                    const params = {};
+                    const method = apiMethods[methodId];
+                    
+                    // Collect parameters
+                    method.params.forEach(param => {
+                        const inputEl = document.getElementById(`param-${param.name}`);
+                        if (inputEl && inputEl.value) {
+                            let value = inputEl.value;
+                            
+                            if (param.type === 'object' || param.type === 'array') {
+                                try {
+                                    value = JSON.parse(value);
+                                } catch (e) {
+                                    // Keep as string if not valid JSON
+                                }
+                            } else if (param.type === 'boolean') {
+                                value = value === 'true';
+                            } else if (param.type === 'number' || param.type === 'integer') {
+                                value = Number(value);
+                            }
+                            
+                            params[param.name] = value;
+                        }
+                    });
+                    
+                    // Prepare request data
+                    const requestData = {
+                        client_type: clientTypeSelect.value,
+                        method: methodId,
+                        params: params,
+                        max_retries: parseInt(maxRetries.value, 10),
+                        sleep_retry_seconds: parseInt(sleepRetrySeconds.value, 10)
+                    };
+                    
+                    // Make API request
+                    const startTime = performance.now();
+                    const response = await fetch('/api/call', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+                    const endTime = performance.now();
+                    
+                    const responseData = await response.json();
+                    
+                    // Display response
+                    statusCode.textContent = `Status: ${response.status}`;
+                    responseTime.textContent = `${Math.round(endTime - startTime)}ms`;
+                    responseContainer.textContent = JSON.stringify(responseData, null, 2);
+                    
+                    // Update status color
+                    if (response.ok) {
+                        statusCode.className = 'badge bg-success me-2';
+                    } else {
+                        statusCode.className = 'badge bg-danger me-2';
+                    }
+                    
+                } catch (error) {
+                    console.error('API call error:', error);
+                    
+                    // Display error
+                    statusCode.textContent = 'Error';
+                    statusCode.className = 'badge bg-danger me-2';
+                    responseContainer.textContent = `Error: ${error.message}`;
+                } finally {
+                    // Reset button state
+                    executeBtn.disabled = false;
+                    executeBtn.textContent = 'Execute';
+                }
+            });
+            
+            // Copy response functionality
+            copyResponseBtn.addEventListener('click', function() {
+                const responseText = responseContainer.textContent;
+                navigator.clipboard.writeText(responseText)
+                    .then(() => {
+                        // Show feedback
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text: ', err);
+                    });
+            });
+
+            // Client type change - update method examples
+            clientTypeSelect.addEventListener('change', function() {
+                if (methodSelect.value) {
+                    // Trigger the method change event to update examples
+                    const event = new Event('change');
+                    methodSelect.dispatchEvent(event);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

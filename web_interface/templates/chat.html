@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Cohere Compass SDK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cohere-theme.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Simple blue-themed styling for Cohere */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        .navbar {
+            background-color: #0d6efd;
+        }
+        
+        .model-badge {
+            background-color: #0d6efd;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .chat-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        @media (min-width: 992px) {
+            .chat-container {
+                grid-template-columns: 3fr 2fr;
+            }
+        }
+        
+        .messages-container {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        
+        .settings-panel {
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 16px;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .chat-input {
+            flex-grow: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            resize: none;
+        }
+        
+        .system-message {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        
+        .search-results {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            background: white;
+            max-height: 540px;
+            overflow-y: auto;
+        }
+        
+        /* Fixed-width font for search results */
+        .search-result-content {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        /* Fixed-width font for modal content */
+        .modal-document-content {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .search-result {
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .search-result-meta {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            background-color: #f8f9fa;
+            font-size: 0.8rem;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative blobs -->
+    <div class="blob-decoration blob-blue"></div>
+    <div class="blob-decoration blob-purple"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cohere Compass SDK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/indexes">Indexes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api-explorer">API Explorer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0" id="page-title">
+                {% if index_name %}
+                Chat with <span class="gradient-text">{{ index_name }}</span>
+                {% else %}
+                <span class="gradient-text">Chat Interface</span>
+                {% endif %}
+            </h1>
+            <div class="d-flex align-items-center">
+                <div class="model-badge me-2" id="model-badge">
+                    <i class="bi bi-cpu"></i>
+                    <span>Model: <span class="model-name" id="model-name">{{ settings.get('chat_model', 'command-a-03-2025-quality') }}</span></span>
+                </div>
+                <a href="/indexes" class="btn btn-outline-primary btn-sm" id="back-button">Back to Indexes</a>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="chat-container fade-in-element">
+            <div>
+                <div class="settings-panel fade-in-element" id="index-selector-panel" {% if index_name %}style="display: none;"{% endif %}>
+                    <div class="mb-3">
+                        <label for="index-select" class="form-label">Select an index to chat with:</label>
+                        <select id="index-select" class="form-select">
+                            <option value="">-- Select an index --</option>
+                            {% for index in indexes %}
+                            <option value="{{ index.name }}" {% if index_name and index.name == index_name %}selected{% endif %}>{{ index.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="messages-container fade-in-element" id="messagesContainer">
+                    <div class="message system-message fade-in">
+                        <div class="message-content">
+                            <p id="welcome-message">
+                                {% if index_name %}
+                                Welcome to the chat interface. Ask questions about the documents in the "{{ index_name }}" index.
+                                {% else %}
+                                Welcome to the chat interface. Please select an index to start chatting.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container fade-in-element">
+                    <textarea class="chat-input" id="chatInput" placeholder="{% if index_name %}Type your message here...{% else %}Select an index and type your message here...{% endif %}" rows="3" {% if not index_name %}disabled{% endif %}></textarea>
+                    <button class="btn btn-primary send-button" id="sendButton" {% if not index_name %}disabled{% endif %}>
+                        <span>Send</span>
+                        <div class="spinner hidden" id="sendSpinner"></div>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="search-results-panel fade-in-element">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Search Results</h5>
+                        <p class="text-muted mb-0 small">These documents are used as context for the responses</p>
+                    </div>
+                    <div class="search-results" id="searchResultsContainer">
+                        <div class="empty-state">
+                            <p>Search results will appear here after you send a message.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">Cohere Compass SDK Web Interface</p>
+        </div>
+    </footer>
+
+    <!-- Document Preview Modal -->
+    <div class="modal fade" id="documentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Document Content</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-document-content" id="modalDocumentContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/cohere-theme.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const indexSelect = document.getElementById('index-select');
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendButton');
+            const sendSpinner = document.getElementById('sendSpinner');
+            const messagesContainer = document.getElementById('messagesContainer');
+            const searchResultsContainer = document.getElementById('searchResultsContainer');
+            const modalDocumentContent = document.getElementById('modalDocumentContent');
+            const documentModal = new bootstrap.Modal(document.getElementById('documentModal'));
+            const modelNameElement = document.getElementById('model-name');
+            const pageTitle = document.getElementById('page-title');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const backButton = document.getElementById('back-button');
+            
+            let currentModelName = "Loading...";
+            
+            // Get the initial index name (if any)
+            let selectedIndex = '{{ index_name }}' || '';
+            
+            // Initialize the URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlIndex = urlParams.get('index');
+            
+            // If there's an index in the URL parameters, select it
+            if (urlIndex && !selectedIndex) {
+                selectedIndex = urlIndex;
+                const indexOption = Array.from(indexSelect.options).find(option => option.value === selectedIndex);
+                if (indexOption) {
+                    indexOption.selected = true;
+                    enableChat(selectedIndex);
+                }
+            }
+            
+            // Update back button based on selected index
+            updateBackButton(selectedIndex);
+            
+            // Enable/disable chat based on index selection
+            indexSelect.addEventListener('change', function() {
+                selectedIndex = this.value;
+                
+                // Update URL without reloading the page
+                if (selectedIndex) {
+                    const url = new URL(window.location);
+                    url.searchParams.set('index', selectedIndex);
+                    window.history.pushState({}, '', url);
+                } else {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('index');
+                    window.history.pushState({}, '', url);
+                }
+                
+                enableChat(selectedIndex);
+                updateBackButton(selectedIndex);
+            });
+            
+            function enableChat(indexName) {
+                if (indexName) {
+                    chatInput.disabled = false;
+                    sendButton.disabled = false;
+                    chatInput.placeholder = `Ask a question about the "${indexName}" index...`;
+                    chatInput.focus();
+                    
+                    // Update page title
+                    pageTitle.innerHTML = `Chat with <span class="gradient-text">${indexName}</span>`;
+                    
+                    // Clear previous messages except the first system message
+                    while (messagesContainer.children.length > 1) {
+                        messagesContainer.removeChild(messagesContainer.lastChild);
+                    }
+                    
+                    // Update system message
+                    welcomeMessage.textContent = `You are now chatting with the "${indexName}" index. Ask questions about its documents.`;
+                    
+                    // Clear search results
+                    searchResultsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <p>Search results will appear here after you send a message.</p>
+                        </div>
+                    `;
+                } else {
+                    chatInput.disabled = true;
+                    sendButton.disabled = true;
+                    chatInput.placeholder = 'Select an index and type your message here...';
+                    
+                    // Update page title
+                    pageTitle.innerHTML = `<span class="gradient-text">Chat Interface</span>`;
+                    
+                    // Update system message
+                    welcomeMessage.textContent = 'Welcome to the chat interface. Please select an index to start chatting.';
+                }
+            }
+            
+            function updateBackButton(indexName) {
+                if (indexName) {
+                    backButton.href = `/indexes/${indexName}`;
+                    backButton.textContent = 'Back to Index';
+                } else {
+                    backButton.href = '/indexes';
+                    backButton.textContent = 'Back to Indexes';
+                }
+            }
+            
+            // Function to handle sending a message
+            async function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message || !selectedIndex) return;
+                
+                // Clear input
+                chatInput.value = '';
+                
+                // Add user message to the chat
+                addMessage('user', message);
+                
+                // Disable input and show spinner
+                sendButton.disabled = true;
+                chatInput.disabled = true;
+                sendSpinner.classList.remove('hidden');
+                sendButton.querySelector('span').classList.add('hidden');
+                
+                try {
+                    // Determine which endpoint to use based on how we're accessing the page
+                    const endpoint = window.location.pathname.includes(`/indexes/${selectedIndex}/chat`) 
+                        ? `/indexes/${selectedIndex}/chat-generate` 
+                        : '/chat/generate';
+                    
+                    // Prepare the request data
+                    const requestData = endpoint === '/chat/generate'
+                        ? { prompt: message, index_name: selectedIndex }
+                        : { prompt: message };
+                    
+                    // Send request to server
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Add assistant message to the chat
+                        addMessage('assistant', data.response);
+                        
+                        // Update search results
+                        updateSearchResults(data.search_results);
+                        
+                        // Update model name
+                        if (data.model_used) {
+                            currentModelName = data.model_used;
+                            updateModelBadge(currentModelName);
+                        }
+                    } else {
+                        // Add error message
+                        addMessage('system', `Error: ${data.error}`);
+                    }
+                } catch (error) {
+                    // Add error message
+                    addMessage('system', `Error: ${error.message}`);
+                } finally {
+                    // Re-enable input and hide spinner
+                    sendButton.disabled = false;
+                    chatInput.disabled = false;
+                    sendSpinner.classList.add('hidden');
+                    sendButton.querySelector('span').classList.remove('hidden');
+                    
+                    // Focus back on input
+                    chatInput.focus();
+                }
+            }
+            
+            // Send message on button click
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Allow Enter key to send message (Shift+Enter for new line)
+            chatInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Helper function to add a message to the chat
+            function addMessage(role, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${role}-message fade-in`;
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                
+                const paragraph = document.createElement('p');
+                paragraph.textContent = content;
+                
+                messageContent.appendChild(paragraph);
+                messageDiv.appendChild(messageContent);
+                
+                messagesContainer.appendChild(messageDiv);
+                
+                // Scroll to the bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            // Helper function to update search results
+            function updateSearchResults(results) {
+                searchResultsContainer.innerHTML = '';
+                
+                if (!results || results.length === 0) {
+                    const emptyState = document.createElement('div');
+                    emptyState.className = 'empty-state';
+                    emptyState.innerHTML = '<p>No relevant documents found for this query.</p>';
+                    searchResultsContainer.appendChild(emptyState);
+                    return;
+                }
+                
+                results.forEach((result) => {
+                    if (!result || typeof result !== 'object') {
+                        console.error('Invalid result object:', result);
+                        return;
+                    }
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'search-result fade-in';
+                    
+                    const resultContent = document.createElement('div');
+                    resultContent.className = 'search-result-content';
+                    
+                    // Ensure we have text content
+                    const textContent = typeof result.text === 'string' ? result.text : 
+                                      (typeof result === 'string' ? result : 
+                                       JSON.stringify(result, null, 2));
+                    
+                    resultContent.textContent = textContent;
+                    
+                    const resultMeta = document.createElement('div');
+                    resultMeta.className = 'search-result-meta';
+                    
+                    const docId = result.document_id || 'Unknown';
+                    const score = result.score ? result.score.toFixed(4) : 'N/A';
+                    
+                    const docIdSpan = document.createElement('span');
+                    docIdSpan.textContent = `Document ID: ${docId}`;
+                    resultMeta.appendChild(docIdSpan);
+                    
+                    const scoreSpan = document.createElement('span');
+                    scoreSpan.textContent = `Score: ${score}`;
+                    resultMeta.appendChild(scoreSpan);
+                    
+                    resultDiv.appendChild(resultContent);
+                    resultDiv.appendChild(resultMeta);
+                    searchResultsContainer.appendChild(resultDiv);
+                    
+                    // Add click event to show modal with full content
+                    resultDiv.addEventListener('click', function() {
+                        modalDocumentContent.textContent = textContent;
+                        documentModal.show();
+                    });
+                });
+            }
+            
+            // Function to update the model badge
+            function updateModelBadge(modelName) {
+                const modelBadge = document.getElementById('model-badge');
+                const modelNameElement = document.getElementById('model-name');
+                
+                // Add changing class for transition effect
+                modelBadge.classList.add('changing');
+                
+                // After a short delay, update the model name and remove the changing class
+                setTimeout(() => {
+                    modelNameElement.textContent = modelName || 'Default';
+                    modelBadge.classList.remove('changing');
+                }, 300);
+            }
+            
+            // Check URL parameters on load to automatically select index
+            if (urlParams.has('index')) {
+                const indexFromURL = urlParams.get('index');
+                const indexOption = Array.from(indexSelect.options).find(option => option.value === indexFromURL);
+                if (indexOption) {
+                    indexOption.selected = true;
+                    enableChat(indexFromURL);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

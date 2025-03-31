@@ -1,0 +1,380 @@
+/* Cohere Theme CSS
+ * Based on Cohere's brand design at cohere.com
+ */
+
+:root {
+  /* Color palette based on Cohere's website */
+  --cohere-blue: #0d6efd;
+  --cohere-dark-blue: #0050c9;
+  --cohere-light-blue: #e6f0ff;
+  --cohere-black: #000000;
+  --cohere-white: #ffffff;
+  --cohere-gray-50: #f9fafb;
+  --cohere-gray-100: #f3f4f6;
+  --cohere-gray-200: #e5e7eb;
+  --cohere-gray-300: #d1d5db;
+  --cohere-gray-400: #9ca3af;
+  --cohere-gray-500: #6b7280;
+  --cohere-gray-600: #4b5563;
+  --cohere-gray-700: #374151;
+  --cohere-gray-800: #1f2937;
+  --cohere-gray-900: #111827;
+  --cohere-purple: #6200ee;
+  --cohere-teal: #03dac6;
+  --cohere-gradient-start: #0050c9;
+  --cohere-gradient-end: #6200ee;
+}
+
+/* Typography */
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--cohere-gray-900);
+  line-height: 1.5;
+  background-color: var(--cohere-white);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2.5rem;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 2rem;
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+p {
+  margin-bottom: 1.5rem;
+}
+
+/* Navbar */
+.navbar {
+  background: var(--cohere-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 1rem 0;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--cohere-black);
+}
+
+.navbar-dark {
+  background: linear-gradient(135deg, var(--cohere-gradient-start), var(--cohere-gradient-end));
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .nav-link {
+  color: var(--cohere-white);
+}
+
+.nav-link {
+  font-weight: 500;
+  color: var(--cohere-gray-700);
+  padding: 0.5rem 1rem;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--cohere-blue);
+}
+
+.nav-link.active {
+  color: var(--cohere-blue);
+  font-weight: 600;
+}
+
+/* Buttons */
+.btn {
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 0.5rem 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--cohere-blue);
+  border-color: var(--cohere-blue);
+}
+
+.btn-primary:hover {
+  background-color: var(--cohere-dark-blue);
+  border-color: var(--cohere-dark-blue);
+}
+
+.btn-outline-primary {
+  color: var(--cohere-blue);
+  border-color: var(--cohere-blue);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--cohere-light-blue);
+  color: var(--cohere-blue);
+}
+
+/* Cards */
+.card {
+  border-radius: 12px;
+  border: 1px solid var(--cohere-gray-200);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: var(--cohere-white);
+  border-bottom: 1px solid var(--cohere-gray-200);
+  padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Forms */
+.form-control {
+  border-radius: 8px;
+  border: 1px solid var(--cohere-gray-300);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+.form-control:focus {
+  border-color: var(--cohere-blue);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--cohere-gray-700);
+}
+
+/* Chat specific styles */
+.chat-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .chat-container {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  max-height: 500px;
+  overflow-y: auto;
+  background-color: var(--cohere-gray-50);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--cohere-gray-200);
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+}
+
+.user-message {
+  align-self: flex-end;
+}
+
+.assistant-message, .system-message {
+  align-self: flex-start;
+}
+
+.message-content {
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.user-message .message-content {
+  background-color: var(--cohere-blue);
+  color: var(--cohere-white);
+}
+
+.assistant-message .message-content {
+  background-color: var(--cohere-white);
+  border: 1px solid var(--cohere-gray-200);
+}
+
+.system-message .message-content {
+  background-color: var(--cohere-gray-100);
+  border: 1px solid var(--cohere-gray-200);
+  font-style: italic;
+}
+
+.chat-input-container {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background-color: var(--cohere-gray-50);
+  border-radius: 12px;
+  border: 1px solid var(--cohere-gray-200);
+}
+
+.chat-input {
+  flex-grow: 1;
+  padding: 12px;
+  border: 1px solid var(--cohere-gray-300);
+  border-radius: 8px;
+  resize: none;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--cohere-blue);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.send-button {
+  align-self: flex-end;
+  height: 44px;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cohere-blue);
+  border-color: var(--cohere-blue);
+}
+
+.send-button:hover {
+  background-color: var(--cohere-dark-blue);
+  border-color: var(--cohere-dark-blue);
+}
+
+/* Search Results */
+.search-results-panel .card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.search-results {
+  padding: 16px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.search-result {
+  padding: 16px;
+  border: 1px solid var(--cohere-gray-200);
+  border-radius: 12px;
+  background-color: var(--cohere-white);
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.search-result:hover {
+  border-color: var(--cohere-blue);
+  background-color: var(--cohere-gray-50);
+}
+
+/* Blob decorations like Cohere site */
+.blob-decoration {
+  position: absolute;
+  z-index: -1;
+  opacity: 0.5;
+  filter: blur(40px);
+  border-radius: 50%;
+}
+
+.blob-blue {
+  background: var(--cohere-blue);
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  right: -150px;
+}
+
+.blob-purple {
+  background: var(--cohere-purple);
+  width: 250px;
+  height: 250px;
+  bottom: -100px;
+  left: -100px;
+}
+
+/* Model badge in Cohere style */
+.model-badge {
+  background-color: var(--cohere-blue);
+  color: var(--cohere-white);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.model-badge i {
+  font-size: 1rem;
+}
+
+.model-badge .model-name {
+  font-weight: 600;
+}
+
+.model-badge.changing {
+  background-color: var(--cohere-gray-500);
+}
+
+/* Footer */
+footer {
+  background-color: var(--cohere-gray-50);
+  border-top: 1px solid var(--cohere-gray-200);
+  padding: 2rem 0;
+  margin-top: 3rem;
+}
+
+/* Custom animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease forwards;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: var(--cohere-white);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+} 

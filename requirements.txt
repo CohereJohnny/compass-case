@@ -1,0 +1,16 @@
+# Core SDK dependencies
+git+https://github.com/cohere-ai/cohere-compass-sdk.git
+requests>=2.32.0
+joblib>=1.4.0
+tenacity==8.2.3
+fsspec>=2025.0.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Web interface dependencies
+flask==2.3.3
+
+# Documentation dependencies
+sphinx==8.2.3
+sphinx-rtd-theme==3.0.2
+sphinx-autodoc-typehints==3.1.0
